@@ -1,0 +1,16 @@
+{
+  "name": "com.ashutosh.analytics-sdk",
+  "version": "0.1.0",
+  "displayName": "Ashutosh Analytics SDK",
+  "description": "Lightweight analytics SDK for Unity: events, batching, offline queue, retry/backoff, and pluggable transports.",
+  "unity": "6000.3",
+  "author": {
+    "name": "Ashutosh Kale"
+  },
+  "keywords": [
+    "analytics",
+    "sdk",
+    "telemetry",
+    "upm"
+  ]
+}
