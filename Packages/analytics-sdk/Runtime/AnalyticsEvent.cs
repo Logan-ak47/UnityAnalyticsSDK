@@ -1,4 +1,3 @@
-// AnalyticsEvent.cs
 using System;
 using System.Collections.Generic;
 
@@ -11,10 +10,22 @@ namespace Ashutosh.AnalyticsSdk
         public IReadOnlyDictionary<string, object> Properties { get; }
 
         public AnalyticsEvent(string name, IReadOnlyDictionary<string, object> properties = null)
+            : this(name, DateTimeOffset.UtcNow, properties)
+        {
+        }
+
+        internal AnalyticsEvent(string name, DateTimeOffset timestamp, IReadOnlyDictionary<string, object> properties)
         {
             Name = name;
-            Timestamp = DateTimeOffset.UtcNow;
+            Timestamp = timestamp;
             Properties = properties ?? new Dictionary<string, object>();
         }
     }
 }
+
+
+
+
+
+
+
