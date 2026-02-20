@@ -1,0 +1,9 @@
+{
+  "name": "Ashutosh.AnalyticsSdk.Tests.Runtime",
+  "references": [
+    "Ashutosh.AnalyticsSdk"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}
