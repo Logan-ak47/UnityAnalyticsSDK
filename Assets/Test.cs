@@ -1,21 +1,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Ashutosh.AnalyticsSdk;
+using Ashutosh.AnalyticsSdk.Transports;
 
 public class Test : MonoBehaviour
 {
+     private IAnalyticsClient _client;
+    private MockTransport _mock;
+
     void Start()
     {
-        var client = new AnalyticsClient(new AnalyticsConfig("https://example.com"));
+        _mock = new MockTransport(TransportResult.Success(200));
+        _client = new AnalyticsClient(new AnalyticsConfig("https://example.com"), _mock);
 
-        client.Track("level_start", new Dictionary<string, object>
-        {
-            { "level", 3 },
-            { "mode", "hard" },
-            { "bad_value", this } // should be dropped by validator
-        });
+        _client.Track("evt", new Dictionary<string, object>{{"a", 1}});
+        _client.Flush();
 
-        var stats = client.GetStats();
-        Debug.Log($"Queued: {stats.QueuedEventCount}, LastError: {stats.LastError}");
+        Debug.Log("SendCount=" + _mock.SendCount);
     }
 }

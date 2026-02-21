@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using Ashutosh.AnalyticsSdk.Internal;
 using Ashutosh.AnalyticsSdk.Internal.Validation;
 
+using System.Threading.Tasks;
+using Ashutosh.AnalyticsSdk.Internal.Serialization;
+using Ashutosh.AnalyticsSdk.Transports;
+
 namespace Ashutosh.AnalyticsSdk
 {
     public sealed class AnalyticsClient : IAnalyticsClient
@@ -13,13 +17,23 @@ namespace Ashutosh.AnalyticsSdk
         private string _userId;
         private string _sessionId;
 
+
         private DateTimeOffset? _lastFlushTimeUtc;
         private string _lastError;
 
-        public AnalyticsClient(AnalyticsConfig config)
+
+
+        private readonly ITransport _transport;
+        private readonly IEventSerializer _serializer;
+        private bool _isFlushing;
+        private const string SdkVersion = "0.1.0"; // later: derive from package version/tag
+
+        public AnalyticsClient(AnalyticsConfig config, ITransport transport = null)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _queue = new EventQueue();
+              _serializer = new JsonEventSerializer();
+             _transport = transport ?? new UnityWebRequestTransport(_config.EndpointUrl);
         }
 
         public void SetUserId(string userId) => _userId = userId;
@@ -56,9 +70,53 @@ namespace Ashutosh.AnalyticsSdk
 
         public void Flush()
         {
-            _lastFlushTimeUtc = DateTimeOffset.UtcNow;
-            // Day 4+: send batches via transport
+             _ = FlushOnceAsync();
         }
+
+        internal async Task FlushOnceAsync()
+{
+    if (_isFlushing) return;
+    _isFlushing = true;
+
+    try
+    {
+        if (_queue.Count == 0) return;
+
+        var batch = _queue.PeekBatch(_config.MaxEventsPerBatch);
+        if (batch.Count == 0) return;
+
+        var payload = new AnalyticsPayload(
+            new AnalyticsContext(SdkVersion, _userId, _sessionId),
+            batch
+        );
+
+        var bytes = _serializer.Serialize(payload);
+        var result = await _transport.SendAsync(bytes, _serializer.ContentType, default);
+
+        if (result.IsSuccess)
+        {
+            _queue.DropBatch(batch.Count);
+            _lastError = null;
+            _lastFlushTimeUtc = DateTimeOffset.UtcNow;
+            return;
+        }
+
+        _lastError = $"Flush failed ({result.StatusCode}) {result.Error}";
+
+        if (result.IsRetryable)
+        {
+            // Keep queue intact; caller can retry later (Day 8+: auto retry/backoff).
+            return;
+        }
+
+        // Fatal: drop the batch so the queue doesn’t get blocked forever.
+        _queue.DropBatch(batch.Count);
+    }
+    finally
+    {
+        _isFlushing = false;
+    }
+}
 
         public AnalyticsStats GetStats()
         {
