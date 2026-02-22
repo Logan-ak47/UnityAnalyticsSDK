@@ -28,12 +28,19 @@ namespace Ashutosh.AnalyticsSdk
         private bool _isFlushing;
         private const string SdkVersion = "0.1.0"; // later: derive from package version/tag
 
+        private float _flushTimer;
+
         public AnalyticsClient(AnalyticsConfig config, ITransport transport = null)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _queue = new EventQueue();
               _serializer = new JsonEventSerializer();
              _transport = transport ?? new UnityWebRequestTransport(_config.EndpointUrl);
+
+             if (_config.EnableAutoFlush && _config.FlushIntervalSeconds > 0f)
+{
+            Ashutosh.AnalyticsSdk.Internal.AnalyticsRuntime.Register(this);
+}
         }
 
         public void SetUserId(string userId) => _userId = userId;
@@ -70,8 +77,62 @@ namespace Ashutosh.AnalyticsSdk
 
         public void Flush()
         {
-             _ = FlushOnceAsync();
+             _ = FlushUpToAsync(_config.MaxBatchesPerFlush);
         }
+
+
+        internal async Task FlushUpToAsync(int maxBatches)
+{
+    if (_isFlushing) return;
+    _isFlushing = true;
+
+    try
+    {
+        int batchesSent = 0;
+        if (maxBatches <= 0) maxBatches = 1;
+
+        while (_queue.Count > 0 && batchesSent < maxBatches)
+        {
+            var batch = _queue.PeekBatch(_config.MaxEventsPerBatch);
+            if (batch.Count == 0) break;
+
+            var payload = new AnalyticsPayload(
+                new AnalyticsContext(SdkVersion, _userId, _sessionId),
+                batch
+            );
+
+            var bytes = _serializer.Serialize(payload);
+            var result = await _transport.SendAsync(bytes, _serializer.ContentType, default);
+
+            batchesSent++;
+
+            if (result.IsSuccess)
+            {
+                _queue.DropBatch(batch.Count);
+                _lastError = null;
+                _lastFlushTimeUtc = System.DateTimeOffset.UtcNow;
+                continue;
+            }
+
+            _lastError = $"Flush failed ({result.StatusCode}) {result.Error}";
+            _lastFlushTimeUtc = System.DateTimeOffset.UtcNow;
+
+            if (result.IsRetryable)
+            {
+                // Keep queue intact; stop here. Next tick/manual flush will retry.
+                break;
+            }
+
+            // Fatal: drop the batch to avoid blocking forever, then stop to avoid spamming.
+            _queue.DropBatch(batch.Count);
+            break;
+        }
+    }
+    finally
+    {
+        _isFlushing = false;
+    }
+}
 
         internal async Task FlushOnceAsync()
 {
@@ -126,5 +187,21 @@ namespace Ashutosh.AnalyticsSdk
                 lastError: _lastError
             );
         }
+
+
+        internal void Tick(float unscaledDeltaTime)
+{
+    if (!_config.EnableAutoFlush) return;
+    if (_config.FlushIntervalSeconds <= 0f) return;
+    if (_queue.Count == 0) return;
+
+    _flushTimer += unscaledDeltaTime;
+    if (_flushTimer < _config.FlushIntervalSeconds) return;
+
+    // reset timer (simple reset is fine; you can also subtract interval to reduce drift)
+    _flushTimer = 0f;
+
+    _ = FlushUpToAsync(_config.MaxBatchesPerFlush);
+}
     }
 }
