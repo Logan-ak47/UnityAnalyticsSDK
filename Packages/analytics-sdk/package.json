@@ -12,5 +12,12 @@
     "sdk",
     "telemetry",
     "upm"
+  ],
+  "samples": [
+  {
+    "displayName": "Analytics SDK Demo",
+    "description": "UI Toolkit demo scene for tracking events and flushing batches.",
+    "path": "Samples~/Demo"
+  }
   ]
 }

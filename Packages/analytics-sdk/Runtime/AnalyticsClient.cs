@@ -6,9 +6,13 @@ using Ashutosh.AnalyticsSdk.Internal.Validation;
 using System.Threading.Tasks;
 using Ashutosh.AnalyticsSdk.Internal.Serialization;
 using Ashutosh.AnalyticsSdk.Transports;
+using Ashutosh.AnalyticsSdk.Internal.Logging;
 
 namespace Ashutosh.AnalyticsSdk
 {
+    /// <summary>
+    /// Default analytics client implementation with in-memory batching and flushing.
+    /// </summary>
     public sealed class AnalyticsClient : IAnalyticsClient
     {
         private readonly AnalyticsConfig _config;
@@ -30,12 +34,20 @@ namespace Ashutosh.AnalyticsSdk
 
         private float _flushTimer;
 
+        /// <summary>
+        /// Creates a client using the provided configuration and optional transport.
+        /// </summary>
+        /// <param name="config">Client configuration.</param>
+        /// <param name="transport">Optional custom transport. Uses UnityWebRequest by default.</param>
         public AnalyticsClient(AnalyticsConfig config, ITransport transport = null)
         {
+
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _queue = new EventQueue();
               _serializer = new JsonEventSerializer();
              _transport = transport ?? new UnityWebRequestTransport(_config.EndpointUrl);
+
+            SdkLogger.Enabled = _config.EnableLogging;
 
              if (_config.EnableAutoFlush && _config.FlushIntervalSeconds > 0f)
 {
@@ -43,15 +55,29 @@ namespace Ashutosh.AnalyticsSdk
 }
         }
 
+        /// <summary>
+        /// Sets the user ID attached to future flushed events.
+        /// </summary>
+        /// <param name="userId">Application-defined user ID.</param>
         public void SetUserId(string userId) => _userId = userId;
+
+        /// <summary>
+        /// Sets the session ID attached to future flushed events.
+        /// </summary>
+        /// <param name="sessionId">Application-defined session ID.</param>
         public void SetSessionId(string sessionId) => _sessionId = sessionId;
 
+        /// <summary>
+        /// Validates and queues an event by name.
+        /// </summary>
+        /// <param name="eventName">Event name to record.</param>
+        /// <param name="properties">Optional event properties.</param>
         public void Track(string eventName, IReadOnlyDictionary<string, object> properties = null)
         {
             if (!EventValidator.TrySanitize(eventName, properties, out var sanitizedName, out var sanitizedProps, out var error))
             {
                 _lastError = $"Track dropped event: {error}";
-                if (_config.EnableLogging) UnityEngine.Debug.LogWarning(_lastError);
+                SdkLogger.Warn(_lastError);
                 return;
             }
 
@@ -59,6 +85,10 @@ namespace Ashutosh.AnalyticsSdk
             Track(evt);
         }
 
+        /// <summary>
+        /// Validates and queues a pre-built event.
+        /// </summary>
+        /// <param name="evt">Event instance to enqueue.</param>
         public void Track(AnalyticsEvent evt)
         {
             if (evt == null) throw new ArgumentNullException(nameof(evt));
@@ -66,7 +96,7 @@ namespace Ashutosh.AnalyticsSdk
             if (!EventValidator.TrySanitize(evt.Name, evt.Properties, out var sanitizedName, out var sanitizedProps, out var error))
             {
                 _lastError = $"Track dropped event: {error}";
-                if (_config.EnableLogging) UnityEngine.Debug.LogWarning(_lastError);
+                SdkLogger.Warn(_lastError);
                 return;
             }
 
@@ -75,6 +105,9 @@ namespace Ashutosh.AnalyticsSdk
             _queue.Enqueue(sanitizedEvt);
         }
 
+        /// <summary>
+        /// Starts an asynchronous flush of queued events.
+        /// </summary>
         public void Flush()
         {
              _ = FlushUpToAsync(_config.MaxBatchesPerFlush);
@@ -179,6 +212,10 @@ namespace Ashutosh.AnalyticsSdk
     }
 }
 
+        /// <summary>
+        /// Returns a snapshot of queue size and last flush status.
+        /// </summary>
+        /// <returns>Current analytics client stats.</returns>
         public AnalyticsStats GetStats()
         {
             return new AnalyticsStats(

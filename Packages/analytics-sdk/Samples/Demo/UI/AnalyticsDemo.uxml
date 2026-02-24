@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="root" style="flex-grow: 1; padding: 16px;">
+        <ui:Label name="title" text="Analytics SDK Demo" style="font-size: 20px; unity-font-style: bold; margin-bottom: 8px;"/>
+        <ui:VisualElement style="flex-direction: row; gap: 8px; margin-bottom: 12px;">
+            <ui:Button name="btn_level_start" text="Track: level_start"/>
+            <ui:Button name="btn_purchase" text="Track: purchase"/>
+        </ui:VisualElement>
+        <ui:VisualElement style="flex-direction: row; gap: 8px; margin-bottom: 12px;">
+            <ui:Button name="btn_flush" text="Flush Now"/>
+            <ui:Button name="btn_custom" text="Track: custom_event" style="width: 162px;"/>
+        </ui:VisualElement>
+        <ui:VisualElement style="margin-top: 8px; padding: 12px; border-top-width: 1px;">
+            <ui:Label name="lbl_queue" text="Queued: 0"/>
+            <ui:Label name="lbl_last_flush" text="Last Flush: -"/>
+            <ui:Label name="lbl_last_error" text="Last Error: -"/>
+            <ui:Label name="lbl_send_count" text="Transport SendCount: 0"/>
+        </ui:VisualElement>
+        <ui:Toggle name="toggle_autoflush" label="Auto Flush" value="true"/>
+    </ui:VisualElement>
+</ui:UXML>

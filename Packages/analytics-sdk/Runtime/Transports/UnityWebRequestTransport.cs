@@ -5,17 +5,32 @@ using UnityEngine.Networking;
 
 namespace Ashutosh.AnalyticsSdk.Transports
 {
+    /// <summary>
+    /// UnityWebRequest-based transport for sending analytics payloads over HTTP.
+    /// </summary>
     public sealed class UnityWebRequestTransport : ITransport
     {
         private readonly string _endpointUrl;
         private readonly int _timeoutSeconds;
 
+        /// <summary>
+        /// Creates a transport that POSTs payloads to an endpoint.
+        /// </summary>
+        /// <param name="endpointUrl">Destination endpoint URL.</param>
+        /// <param name="timeoutSeconds">UnityWebRequest timeout in seconds.</param>
         public UnityWebRequestTransport(string endpointUrl, int timeoutSeconds = 10)
         {
             _endpointUrl = endpointUrl;
             _timeoutSeconds = timeoutSeconds;
         }
 
+        /// <summary>
+        /// Sends a serialized analytics payload using HTTP POST.
+        /// </summary>
+        /// <param name="payload">Serialized request body.</param>
+        /// <param name="contentType">Request content type header.</param>
+        /// <param name="ct">Cancellation token (currently not wired to abort).</param>
+        /// <returns>Task resolving to a mapped transport result.</returns>
         public Task<TransportResult> SendAsync(byte[] payload, string contentType, CancellationToken ct)
         {
             var tcs = new TaskCompletionSource<TransportResult>();
