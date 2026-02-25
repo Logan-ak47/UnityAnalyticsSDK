@@ -36,6 +36,11 @@ namespace Ashutosh.AnalyticsSdk
         /// </summary>
         public bool EnableLogging { get; }
 
+
+        public bool EnableDiskPersistence { get; }
+public int MaxDiskBytes { get; }
+public string StoragePathOverride { get; }
+
         /// <summary>
         /// Creates analytics client configuration values.
         /// </summary>
@@ -51,7 +56,10 @@ namespace Ashutosh.AnalyticsSdk
             int maxBatchesPerFlush = 4,
             float flushIntervalSeconds = 5f,
             bool enableAutoFlush = true,
-            bool enableLogging = true)
+            bool enableLogging = true,
+            bool enableDiskPersistence = true,
+            int maxDiskBytes = 5_000_000,
+            string storagePathOverride = null)
         {
             EndpointUrl = endpointUrl;
             MaxEventsPerBatch = maxEventsPerBatch;
@@ -59,6 +67,12 @@ namespace Ashutosh.AnalyticsSdk
             FlushIntervalSeconds = flushIntervalSeconds;
             EnableAutoFlush = enableAutoFlush;
             EnableLogging = enableLogging;
+            EnableDiskPersistence = enableDiskPersistence;
+            MaxDiskBytes = maxDiskBytes;
+            StoragePathOverride = storagePathOverride;
         }
+
+
+        
     }
 }

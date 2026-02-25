@@ -33,9 +33,10 @@ public class AnalyticsDemoController : MonoBehaviour
             endpointUrl: "https://example.com",
             maxEventsPerBatch: 2,
             maxBatchesPerFlush: 4,
-            flushIntervalSeconds: 2f,
+            flushIntervalSeconds: 15f,
             enableAutoFlush: true,
-            enableLogging: true
+            enableLogging: true,
+            enableDiskPersistence: true
         );
 
         _client = new AnalyticsClient(cfg, _mockTransport);
