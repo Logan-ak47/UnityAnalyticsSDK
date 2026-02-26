@@ -38,8 +38,16 @@ namespace Ashutosh.AnalyticsSdk
 
 
         public bool EnableDiskPersistence { get; }
-public int MaxDiskBytes { get; }
-public string StoragePathOverride { get; }
+        public int MaxDiskBytes { get; }
+        public string StoragePathOverride { get; }
+
+
+
+
+        public bool EnableRetry { get; }
+        public int MaxRetryAttempts { get; }
+        public float RetryBaseDelaySeconds { get; }
+        public float RetryMaxDelaySeconds { get; }
 
         /// <summary>
         /// Creates analytics client configuration values.
@@ -59,7 +67,11 @@ public string StoragePathOverride { get; }
             bool enableLogging = true,
             bool enableDiskPersistence = true,
             int maxDiskBytes = 5_000_000,
-            string storagePathOverride = null)
+            string storagePathOverride = null,
+            bool enableRetry = true,
+            int maxRetryAttempts = 5,
+            float retryBaseDelaySeconds = 1f,
+            float retryMaxDelaySeconds = 30f)
         {
             EndpointUrl = endpointUrl;
             MaxEventsPerBatch = maxEventsPerBatch;
@@ -70,9 +82,13 @@ public string StoragePathOverride { get; }
             EnableDiskPersistence = enableDiskPersistence;
             MaxDiskBytes = maxDiskBytes;
             StoragePathOverride = storagePathOverride;
+            EnableRetry = enableRetry;
+            MaxRetryAttempts = maxRetryAttempts;
+            RetryBaseDelaySeconds = retryBaseDelaySeconds;
+            RetryMaxDelaySeconds = retryMaxDelaySeconds;
         }
 
 
-        
+
     }
 }
