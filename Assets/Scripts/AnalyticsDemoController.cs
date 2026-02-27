@@ -21,6 +21,10 @@ public class AnalyticsDemoController : MonoBehaviour
 
     private Toggle _toggleAutoFlush;
 
+
+    private bool _simulateOffline;
+private SimulatedNetworkTransport _simTransport;
+
     private void Awake()
     {
         if (_uiDocument == null)
@@ -28,18 +32,23 @@ public class AnalyticsDemoController : MonoBehaviour
 
         // Use MockTransport so demo works offline and is deterministic for reviewers.
         _mockTransport = new MockTransport(TransportResult.Success(200));
+_simTransport = new SimulatedNetworkTransport(_mockTransport, () => _simulateOffline);
 
         var cfg = new AnalyticsConfig(
-            endpointUrl: "https://example.com",
-            maxEventsPerBatch: 2,
-            maxBatchesPerFlush: 4,
-            flushIntervalSeconds: 15f,
-            enableAutoFlush: true,
-            enableLogging: true,
-            enableDiskPersistence: true
-        );
+    endpointUrl: "https://example.com",
+    maxEventsPerBatch: 2,
+    maxBatchesPerFlush: 4,
+    flushIntervalSeconds: 2f,
+    enableAutoFlush: true,
+    enableLogging: true,
+    enableDiskPersistence: true,   // important for day 10 story
+    enableRetry: true,
+    maxRetryAttempts: 5,
+    retryBaseDelaySeconds: 1f,
+    retryMaxDelaySeconds: 10f
+);
 
-        _client = new AnalyticsClient(cfg, _mockTransport);
+_client = new AnalyticsClient(cfg, _simTransport);
 
         BindUI();
         RefreshStats();
@@ -96,6 +105,12 @@ public class AnalyticsDemoController : MonoBehaviour
             Debug.Log($"AutoFlush toggle set to {evt.newValue}. (Runtime toggle wiring can be added later.)");
         });
 
+        var offlineToggle = root.Q<Toggle>("toggle_offline");
+offlineToggle.RegisterValueChangedCallback(evt =>
+{
+    _simulateOffline = evt.newValue;
+});
+
         _lblQueue = root.Q<Label>("lbl_queue");
         _lblLastFlush = root.Q<Label>("lbl_last_flush");
         _lblLastError = root.Q<Label>("lbl_last_error");
@@ -115,6 +130,6 @@ public class AnalyticsDemoController : MonoBehaviour
         _lblQueue.text = $"Queued: {stats.QueuedEventCount}";
         _lblLastFlush.text = $"Last Flush: {(stats.LastFlushTimeUtc.HasValue ? stats.LastFlushTimeUtc.Value.ToString("HH:mm:ss") : "-")}";
         _lblLastError.text = $"Last Error: {(string.IsNullOrEmpty(stats.LastError) ? "-" : stats.LastError)}";
-        _lblSendCount.text = $"Transport SendCount: {_mockTransport.SendCount}";
+        _lblSendCount.text = $"Send Attempts: {_simTransport.AttemptCount} (Inner: {_mockTransport.SendCount})";
     }
 }

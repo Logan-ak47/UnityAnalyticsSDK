@@ -16,5 +16,6 @@
             <ui:Label name="lbl_send_count" text="Transport SendCount: 0"/>
         </ui:VisualElement>
         <ui:Toggle name="toggle_autoflush" label="Auto Flush" value="true"/>
+       <ui:Toggle name="toggle_offline" label="Simulate Offline" value="false" />
     </ui:VisualElement>
 </ui:UXML>
