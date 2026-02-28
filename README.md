@@ -96,7 +96,7 @@ Assets/DemoAnalyticsSDK/Scenes/AnalyticsDemo.unity
 
 ## Demo
 
-![Analytics Demo](Packages/com.ashutosh.analytics-sdk/Documentation/Media/UnityAnalyticsDemo.gif)
+![Analytics Demo](Packages/analytics-sdk/Documentation/Media/UnityAnalyticsDemo.gif)
 
 
 ---
