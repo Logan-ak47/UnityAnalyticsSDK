@@ -93,6 +93,12 @@ Assets/DemoAnalyticsSDK/Scenes/AnalyticsDemo.unity
 
 > The demo uses `MockTransport` so it works offline and is deterministic for reviewers.
 
+
+## Demo
+
+![Analytics Demo](Packages/com.ashutosh.analytics-sdk/Documentation/Media/UnityAnalyticsDemo.gif)
+
+
 ---
 
 ## Event property rules (sanitization)
@@ -140,6 +146,9 @@ Result handling:
 - `FlushIntervalSeconds` + `EnableAutoFlush`: triggers flush on a timer while events are queued
 
 ---
+
+
+
 
 ## Testing
 
