@@ -258,7 +258,9 @@ public sealed class MyTransport : ITransport
 
 ## Demo Sample
 
-![Analytics SDK demo](documentation/Media/UnityAnalyticsDemo.gif)
+![Analytics SDK demo](Documentation/Media/UnityAnalyticsDemo.gif)
+
+<img src="Documentation/Media/UnityAnalyticsDemo.gif" width="900" />
 
 Sample included:
 
