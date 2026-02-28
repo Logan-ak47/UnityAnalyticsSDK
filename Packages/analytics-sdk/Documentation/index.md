@@ -258,6 +258,8 @@ public sealed class MyTransport : ITransport
 
 ## Demo Sample
 
+![Analytics SDK demo](documentation/Media/UnityAnalyticsDemo.gif)
+
 Sample included:
 
 - `Samples~/Demo`
