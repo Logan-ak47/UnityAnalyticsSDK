@@ -3,7 +3,13 @@
   "version": "0.1.0",
   "displayName": "Ashutosh Analytics SDK",
   "description": "Lightweight analytics SDK for Unity: events, batching, offline queue, retry/backoff, and pluggable transports.",
+  
   "unity": "6000.3",
+
+  "documentationUrl": "https://github.com/<you>/<repo>#readme",
+  "changelogUrl": "https://github.com/<you>/<repo>/blob/main/Packages/<pkg>/CHANGELOG.md",
+  "licensesUrl": "https://github.com/<you>/<repo>/blob/main/Packages/<pkg>/LICENSE.md",
+
   "author": {
     "name": "Ashutosh Kale"
   },
