@@ -6,9 +6,8 @@
   
   "unity": "6000.3",
 
-  "documentationUrl": "https://github.com/<you>/<repo>#readme",
-  "changelogUrl": "https://github.com/<you>/<repo>/blob/main/Packages/<pkg>/CHANGELOG.md",
-  "licensesUrl": "https://github.com/<you>/<repo>/blob/main/Packages/<pkg>/LICENSE.md",
+  "documentationUrl": "https://github.com/Logan-ak47/UnityAnalyticsSDK/blob/main/Packages/analytics-sdk/Documentation/index.md",
+
 
   "author": {
     "name": "Ashutosh Kale"
